@@ -77,7 +77,7 @@ class Database(object):
 
         get_id_query = ("SELECT id FROM professors WHERE lastName = %s AND firstName = %s")
 
-        data_professor = (name_list[0], name_list[1], department, rating, 
+        data_professor = (name_list[0], name_list[1], department, rating,
             name_list[0], name_list[1])
 
         self.cursor.execute(update_professor_query, data_professor)

@@ -72,7 +72,7 @@ def add_prof(prof, rating, prof_department):
     # See if the name was just a mispelling (or the same) of a previous professor
     prof_similar = check_similar(prof, profs_seen.keys())
 
-    # To reduce false positives, make sure similar name has the same department 
+    # To reduce false positives, make sure similar name has the same department
     # UNLESS we have an exact match (this assumes it is more likely they are the same person
     # listed under different departments than just two people with the same name)
     other_department = profs_seen.get(prof_similar, dict()).get('department', None)
