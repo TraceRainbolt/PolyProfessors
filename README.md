@@ -1,7 +1,7 @@
 # PolyProfessors
 The source code for polyprofessors.com.
 
-This repository contains three folder: vue, flask, and scrape.
+This repository contains three folders: vue, flask, and scrape.
 
 Vue contains all vue (frontend) related files.
 Flask contains all flask (backend) related files.

@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -19,6 +21,7 @@ app.config['MYSQL_DATABASE_USER'] = os.environ['DB_USER']
 app.config['MYSQL_DATABASE_PASSWORD'] = os.environ['DB_PASSWORD']
 app.config['MYSQL_DATABASE_DB'] = 'poly_professors'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_CHARSET'] = 'utf8mb4'
 mysql.init_app(app)
 
 
