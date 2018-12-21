@@ -1,17 +1,19 @@
 <template>
     <div class="btn-group">
-        <li @click="toggleMenu()" class="dropdown-toggle" v-if="selectedOption.name !== undefined">
+        <li @click="toggleMenu()" class="dropdown-toggle"
+            v-if="selectedOption.name !== undefined">
           {{ selectedOption.name }}
           <span class="caret"></span>
       </li>
 
-      <li @click="toggleMenu()" class="dropdown-toggle" v-if="selectedOption.name === undefined">
+      <li @click="toggleMenu()" class="dropdown-toggle"
+      v-if="selectedOption.name === undefined">
           {{placeholderText}}
           <span class="caret"></span>
       </li>
 
       <ul class="dropdown-menu" v-if="showMenu">
-        <li v-for="option in options" v-bind:key="option">
+        <li v-for="option in options" v-bind:key="option.name">
             <a href="javascript:void(0)" @click="updateOption(option)">
                 {{ option.name }}
             </a>
@@ -28,7 +30,7 @@ export default {
                 name: '',
             },
             showMenu: false,
-            placeholderText: 'Please select an item',
+            placeholderText: '',
         };
     },
     props: {
@@ -49,6 +51,9 @@ export default {
             this.selectedOption = option;
             this.showMenu = false;
             this.$emit('updateOption', this.selectedOption);
+        },
+        setOption(option){
+            this.selectedOption = option;
         },
         toggleMenu() {
             this.showMenu = !this.showMenu;

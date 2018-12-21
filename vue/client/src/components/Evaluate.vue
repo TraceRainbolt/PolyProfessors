@@ -5,30 +5,39 @@
             <div class="info">
                 <div class="prof-grade-select">
                     <h5>How would you rate this professor?</h5>
-                    <dropdown :options="ratings" :selected="rating"></dropdown>
+                    <dropdown :options="ratings" :selected="rating"
+                    v-on:updateOption="updateRating"></dropdown>
                 </div>
                 <div class="course-select">
                     <h5>Select the course:</h5>
-                    <dropdown :options="courses" :selected="course" ></dropdown>
-                    <input class="course-num" placeholder="101" />
+                    <dropdown ref="courses" :options="courses" :selected="course"
+                        v-on:updateOption="updateCourse"></dropdown>
+                    <input class="course-num" v-model="courseNum" placeholder="101" />
                 </div>
                 <div class="grade-select">
                     <h5>Select your grade:</h5>
-                    <dropdown :options="grades" :selected="grade"></dropdown>
+                    <dropdown :options="grades" :selected="grade"
+                        v-on:updateOption="updateGrade"></dropdown>
                 </div>
                 <div class="year-select">
                     <h5>Select your year:</h5>
-                    <dropdown :options="years" :selected="year"></dropdown>
+                    <dropdown :options="years" :selected="year"
+                        v-on:updateOption="updateYear"></dropdown>
                 </div>
                 <div class="req-select">
                     <h5>Select class fufillment:</h5>
-                    <dropdown :options="fufillments" :selected="fufillment"></dropdown>
+                    <dropdown :options="fufillments" :selected="fufillment"
+                        v-on:updateOption="updateFufillment"></dropdown>
                 </div>
             </div>
             <div class="review">
                 <h5>Please enter your review below:</h5>
-                <textarea></textarea>
-                <button></button>
+                <textarea v-model="review"></textarea>
+                <div class="help">Before submitting your application,
+                    remember that what you submit cannot be edited or deleted.
+                    Make sure you like what you're submitting.
+                </div>
+                <button v-on:click="submitReview">Submit Evaluation</button>
             </div>
         </div>
     </div>
@@ -43,7 +52,9 @@ export default {
     data() {
         return {
             professor: '',
+            review: '',
             courses: [],
+            courseNum: 101,
             course: { name: 'AERO' },
 
             grade: { name: 'A' },
@@ -85,6 +96,7 @@ export default {
     },
     methods: {
         render() {
+            this.id = this.$route.params.id;
             this.getProfessor();
             this.getReleventCourses();
             this.getCourseList();
@@ -93,7 +105,6 @@ export default {
             this.course = payload;
         },
         getProfessor() {
-            this.id = this.$route.params.id;
             const path = `http://localhost:5000/professor?id=${this.id}`;
             axios.get(path)
                 .then((res) => {
@@ -108,8 +119,8 @@ export default {
             const path = `http://localhost:5000/courses?id=${this.id}`;
             axios.get(path)
                 .then((res) => {
-                    this.courses = res.data.map(c => ({ name: c[0] }));
-                    this.course = this.courses[0];
+                    this.courses = res.data.map(c => c[0]);
+                    this.$refs.courses.setOption({ name: res.data[0][0] });
                 })
                 .catch((error) => {
                     this.courses = error;
@@ -119,11 +130,54 @@ export default {
             const path = 'http://localhost:5000/courses';
             axios.get(path)
                 .then((res) => {
-                    const newCourses = res.data.map(c => ({ name: c[0] }));
-                    this.courses = this.courses.concat(newCourses);
+                    const newCourses = res.data.map(c => c[0]);
+                    newCourses.filter((course) => {
+                        if (!this.courses.includes(course)) {
+                            this.courses.push(course);
+                        }
+                        return null;
+                    });
+                    this.courses = this.courses.map(c => ({ name: c }));
                 })
                 .catch((error) => {
                     this.courses = error;
+                });
+        },
+        updateRating(rating) {
+            this.rating = rating;
+        },
+        updateCourse(course) {
+            this.course = course;
+        },
+        updateGrade(grade) {
+            this.grade = grade;
+        },
+        updateYear(year) {
+            this.year = year;
+        },
+        updateFufillment(fufillment) {
+            this.fufillment = fufillment;
+        },
+        submitReview() {
+            const path = 'http://localhost:5000/reviews';
+            const bodyFormData = new FormData();
+
+            bodyFormData.set('grade', this.grade.name);
+            bodyFormData.set('year', this.year.name);
+            bodyFormData.set('requirement', this.fufillment.name);
+            bodyFormData.set('rating', this.rating.name);
+            bodyFormData.set('review', this.review);
+            bodyFormData.set('profId', this.id);
+            bodyFormData.set('num', this.courseNum);
+            bodyFormData.set('department', this.course.name);
+
+            axios.post(path, bodyFormData)
+                .then((res) => {
+                    this.result = res;
+                    this.$router.go(-1);
+                })
+                .catch((error) => {
+                    this.error = error;
                 });
         },
     },
@@ -152,6 +206,36 @@ textarea {
     border: 1px #AAAAAA solid;
     border-radius: 4px;
     resize: none;
+}
+
+.help {
+    position: absolute;
+    bottom: 48px;
+    font-size: 14px;
+    text-align: left;
+    width: 520px;
+}
+
+button {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    padding: 20px 10px;
+    font-family: Montserrat ExtraBold;
+    font-size: 22px;
+    color: #2c3e50;
+    background: #EEEEEE;
+    border: none;
+    border-radius: 2px;
+}
+
+button:hover {
+    background: #DDDDDD;
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
 }
 
 textarea:focus {
