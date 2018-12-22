@@ -1,6 +1,8 @@
 import os
 import datetime
 
+import conversions
+
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -26,42 +28,27 @@ app.config['MYSQL_DATABASE_CHARSET'] = 'utf8mb4'
 mysql.init_app(app)
 
 
-valid_grades = ['A', 'B', 'C', 'D', 'F', 'N/A', 'Credit', 'No Credit']
-
-year_to_num = {'Freshman' : 0,
-               'Sophomore' : 1,
-               'Junior' : 2,
-               'Senior' : 3,
-               '5th Year Senior': 4,
-               'Grad Student' : 5}
-
-req_to_num = {'General Ed' : 0,
-              'Major' : 1,
-              'Support' : 2,
-              'Elective' : 3,
-              'N/A' : 4}
-
-rating_to_num = {'F' : 0,
-                 'D' : 1,
-                 'C' : 2,
-                 'B' : 3,
-                 'A' : 4}
-
-
 # Return a list of professors
 @app.route('/search', methods=['GET'])
 def search_results():
     search = request.args.get('terms')
     sort = request.args.get('sort')
+    department = request.args.get('department')
+
     sort_mode = ''
 
     conn = mysql.connect()
     cursor = conn.cursor()
 
+
     if sort == 'rating':
-        sort_mode = " ORDER BY rating DESC"
-    if sort == 'department':
+        sort_mode = " ORDER BY rating DESC, numEvaluations DESC"
+    elif sort == 'department':
         sort_mode = " ORDER BY department ASC"
+    elif sort == 'review':
+        sort_mode = " ORDER BY department ASC"
+
+
 
     if not search:
         cursor.execute("SELECT * FROM professors" + sort_mode)
@@ -73,7 +60,7 @@ def search_results():
     search_str = f'%{search.lower()}%'
     cursor.execute("""SELECT * FROM professors
                       WHERE CONCAT(firstName, ' ', lastName) LIKE %s
-                      OR CONCAT(lastName, ' ', firstName) LIKE %s """ + sort_mode,
+                      OR CONCAT(lastName, ' ', firstName) LIKE %s""" + sort_mode,
         (search_str, search_str))
     data = cursor.fetchall()
 
@@ -142,7 +129,7 @@ def add_review():
     conn = mysql.connect()
     cursor = conn.cursor()
 
-    prof_id = data_keys[2]
+    prof_id = review_data[2]
 
     # add course if it wasn't already in DB
     cursor.execute("INSERT IGNORE courses (courseDepartment, courseNumber) VALUES (%s, %s)",
@@ -156,12 +143,14 @@ def add_review():
 
     # recalculate professor rating
     cursor.execute("""UPDATE professors SET professors.rating =
-        (SELECT AVG(reviews.rating) FROM reviews WHERE reviews.professorId = %s)""",
+        (SELECT AVG(reviews.rating) FROM reviews
+        WHERE reviews.professorId = professors.id) WHERE professors.id = %s""",
         prof_id)
 
     # recalculate number of evaluations for professor
     cursor.execute("""UPDATE professors SET professors.numEvaluations =
-        (SELECT COUNT(*) FROM reviews WHERE reviews.professorId = %s)""",
+        (SELECT COUNT(*) FROM reviews
+        WHERE reviews.professorId = professors.id) WHERE professors.id = %s""",
         prof_id)
 
     conn.commit()
@@ -172,18 +161,21 @@ def add_review():
 # Return all courses
 @app.route('/courses', methods=['GET'])
 def get_courses():
-    conn = mysql.connect()
-    cursor = conn.cursor()
     prof_id = request.args.get('id')
 
     if not prof_id:
-        cursor.execute("SELECT DISTINCT courseDepartment FROM courses")
+        courses = list(conversions.departments.keys())
     else:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
         cursor.execute("SELECT DISTINCT courseDepartment FROM reviews WHERE professorId = %s",
             prof_id)
+        courses = [row[0] for row in cursor.fetchall()]
 
-    conn.close()
-    return jsonify(cursor.fetchall())
+        conn.close()
+
+    return jsonify(courses)
 
 
 # make sure the review doesn't have any funny business going on
@@ -202,21 +194,21 @@ def check_valid(key, data):
         except:
             abort(400)
 
-    elif key == 'grade' and data not in valid_grades:
+    elif key == 'grade' and data not in conversions.valid_grades:
         abort(400)
 
     elif key == 'rating':
-        data = rating_to_num.get(data)
+        data = conversions.rating_to_num.get(data)
         if data is None:
             abort(400)
 
     elif key == 'requirement':
-        data = req_to_num.get(data)
+        data = conversions.req_to_num.get(data)
         if data is None:
             abort(400)
 
     elif key == 'year':
-        data = year_to_num.get(data)
+        data = conversions.year_to_num.get(data)
         if data is None:
             abort(400)
 

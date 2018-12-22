@@ -84,9 +84,7 @@ export default {
   font-weight: 300;
   margin-bottom: 7px;
   border: 0;
-  background-size: 0 2px, 100% 1px;
-  background-repeat: no-repeat;
-  background-position: center bottom, center calc(100% - 1px);
+
   background-color: white;
   transition: background 0s ease-out;
   float: none;
@@ -148,10 +146,10 @@ export default {
   position: relative;
   top: 10px;
   height: 0;
-  margin-left: 8px;
+  margin-left: 2px;
   vertical-align: middle;
   border-top: 4px dashed;
-  border-top: 4px solid \9;
+  border-top: 4px solid 9;
   border-right: 4px solid transparent;
   border-left: 4px solid transparent;
   float: right;

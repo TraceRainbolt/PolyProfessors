@@ -1,33 +1,13 @@
 import os
 import datetime
 
+import conversions
+
 import mysql.connector
 
-year_to_num = {'Freshman' : 0,
-               'Sophomore' : 1,
-               'Junior' : 2,
-               'Senior' : 3,
-               '5th Year Senior': 4,
-               'Graduate Student' : 5}
-
-req_to_num = {'General Ed' : 0,
-              'Required (Major)' : 1,
-              'Required (Support)' : 2,
-              'Elective' : 3,
-              'N/A' : 4}
-
-month_to_num = { 'Jan' : 1,
-                 'Feb' : 2,
-                 'Mar' : 3,
-                 'Apr' : 4,
-                 'May' : 5,
-                 'Jun' : 6,
-                 'Jul' : 7,
-                 'Aug' : 8,
-                 'Sep' : 9,
-                 'Oct' : 10,
-                 'Nov' : 11,
-                 'Dec' : 12 }
+# Max length of a review is 10000 characters.
+# Should be enough to say what you gotta say.
+MAX_REVIEW_LEN = 10000
 
 class Database(object):
     config = {
@@ -52,7 +32,7 @@ class Database(object):
         self.cursor.execute("TRUNCATE reviews")
         self.cursor.execute("SET FOREIGN_KEY_CHECKS=1")
 
-
+    # Add a professor to the database. Returns the professors internal ID
     def add_professor(self, name, department, rating):
         add_professor_query = """INSERT INTO professors
                 (lastName, firstName, department, rating)
@@ -61,6 +41,8 @@ class Database(object):
         name_list = [s.strip() for s in name.split(",")]
         if len(name_list) > 2:
             name_list = [name_list[0], name_list[-1]]
+
+        department = conversions.departments[department]
 
         data_professor = (*name_list, department, rating)
 
@@ -88,14 +70,16 @@ class Database(object):
 
     def add_review(self, review_data, review_text, class_, prof_id):
         review_data = review_data[:4]
-        review_text = review_text[:10000]
+        review_text = review_text[:MAX_REVIEW_LEN]
         class_dep, class_num = class_.split(' ')
+
+        # convert strings to values that represent them in the database
         month, year = review_data[3].split()
-        month = month_to_num[month]
+        month = conversions.month_to_num[month]
         year = int(year)
 
-        review_data[0] = year_to_num[review_data[0]]
-        review_data[2] = req_to_num[review_data[2]]
+        review_data[0] = conversions.year_to_num[review_data[0]]
+        review_data[2] = conversions.req_to_num[review_data[2]]
         review_data[3] = datetime.datetime(year, month, 1)
 
         add_class_query = """INSERT IGNORE INTO courses (courseDepartment, courseNumber)
@@ -111,12 +95,12 @@ class Database(object):
         self.connection.commit()
 
 
-    def update_rating_and_eval():
+    def update_rating_and_eval(self):
       # Because we do not know the actual rating value of any polyrating reviews,
-      # we set them all to the overall rating. This makes sure new reviews will
+      # we set them all to the overall average rating. This makes sure new reviews will
       # update the average correctly.
       self.cursor.execute("""UPDATE reviews INNER JOIN professors
-        ON reviews.professorId = professors.id SET reviews.rating = professors.rating;""")
+        ON reviews.professorId = professors.id SET reviews.rating = professors.rating""")
 
       self.cursor.execute("""UPDATE professors SET professors.numEvaluations =
         (SELECT COUNT(*) FROM reviews WHERE reviews.professorId = professors.id)""")

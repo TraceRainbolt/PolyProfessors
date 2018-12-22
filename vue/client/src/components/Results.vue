@@ -8,8 +8,10 @@
             <input class="search-text" type="text" v-model="filter"
                 v-on:input="updateSearch(filter)" placeholder="Filter professors..." />
             <div class="filters">
-                <dropdown class="sort" :options="sorts" :selected="sort"
+                <dropdown class="sort-select filter" :options="sorts" :selected="sort"
                         v-on:updateOption="changeSort"></dropdown>
+                <dropdown class="dep-select filter" :options="courses" :selected="course"
+                        v-on:updateOption="changeCourse"></dropdown>
                 <div class="search">
                 </div>
             </div>
@@ -26,6 +28,9 @@
                 </div>
                 <div class="department">
                     {{ result[3] }}
+                </div>
+                <div class="eval-num">
+                    {{ result[5] }} evaluations
                 </div>
             </li>
         </ul>
@@ -45,6 +50,8 @@ export default {
             terms: null,
             filter: null,
             orderby: 'alphabetical',
+            course: { name: 'All' },
+            courses: [{ name: 'All' }],
             sort: { name: 'Alphabetical' },
             sorts: [{ name: 'Alphabetical', val: 'alphabetical' },
                 { name: 'Rating', val: 'rating' },
@@ -95,17 +102,27 @@ export default {
                     this.loading = false;
                 });
         },
+        getCourseList() {
+            const path = 'http://localhost:5000/courses';
+            axios.get(path)
+                .then((res) => {
+                    res.data.map(c => this.courses.push({ name: c }));
+                })
+                .catch((error) => {
+                    this.courses = error;
+                });
+        },
         updateSearch(filter) {
-            this.filterUpdates++;
+            this.filterUpdates += 1;
             setTimeout(() => {
-                this.filterUpdates--;
+                this.filterUpdates -= 1;
                 if (this.filterUpdates === 0) {
                     this.getResults(filter);
                 }
             }, 500);
         },
         formatRating(rating) {
-            if (rating < 0){
+            if (rating < 0) {
                 return 'N/A';
             }
             if (rating !== null) {
@@ -124,6 +141,9 @@ export default {
             this.orderby = sort.val;
             this.getResults(this.filter);
         },
+        changeCourse(course) {
+            // do somtin
+        },
         render() {
             const terms = this.$route.params.terms;
             if (terms) {
@@ -140,6 +160,7 @@ export default {
     },
     created() {
         this.render();
+        this.getCourseList();
     },
 };
 </script>
@@ -151,7 +172,7 @@ export default {
 input[type="text"], input[type="password"], textarea, select {
     outline: none;
     border: 0;
-    font-size: 30px;
+    font-size: 26px;
 }
 
 ul {
@@ -214,35 +235,52 @@ li:hover {
 }
 
 .rating {
+    margin-top: -8px;
     display: inline;
     float: right;
-    font-size: 46px;
+    font-size: 40px;
     color: #555555;
+}
+
+.eval-num {
+    margin-top: -28px;
+    display: inline;
+    float: right;
+    font-size: 22px;
+    color: darkgrey;
 }
 
 .filters {
     z-index: 999;
     display: grid;
     grid-template-areas:
-    'sort search';
+    'sort dep-filter search';
 }
 
-.sort {
-    padding: 15px 10px;
+.filter {
+    padding: 4px 8px 14px 8px;
     background: white;
-    margin-left: 16px;
-    width: 140px;
-    font-size: 18px;
+    font-size: 26px;
     border-radius: 4px;
     filter: drop-shadow(0 3px 2px #b9b9b9);
     border: none;
     background-image: none;
 }
 
+.sort-select {
+    width: 180px;
+    margin-left: 16px;
+}
+
+.dep-select {
+    width: 110px;
+    margin-left: -9px;
+}
+
 .search {
-    width: 600px;
+    width: 432px;
     margin: 10px 0 0 -8px;
-    height: 70px;
+    height: 58px;
     background: #ffffff;
     filter: drop-shadow(0 3px 2px #b9b9b9);
     border-radius: 4px;
@@ -250,9 +288,9 @@ li:hover {
 
 .search-text {
     margin-top: 6px;
-    margin-left: 90px;
+    margin-left: 260px;
     position: absolute;
-    top: 50px;
+    top: 39px;
     width: 500px;
     height: 60px;
     transform: translateX(-50%);

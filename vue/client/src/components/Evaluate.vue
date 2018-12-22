@@ -10,7 +10,7 @@
                 </div>
                 <div class="course-select">
                     <h5>Select the course:</h5>
-                    <dropdown ref="courses" :options="courses" :selected="course"
+                    <dropdown class="dropdown" ref="courses" :options="courses" :selected="course"
                         v-on:updateOption="updateCourse"></dropdown>
                     <input class="course-num" v-model="courseNum" placeholder="101" />
                 </div>
@@ -99,7 +99,6 @@ export default {
             this.id = this.$route.params.id;
             this.getProfessor();
             this.getReleventCourses();
-            this.getCourseList();
         },
         setCourse(payload) {
             this.course = payload;
@@ -119,8 +118,9 @@ export default {
             const path = `http://localhost:5000/courses?id=${this.id}`;
             axios.get(path)
                 .then((res) => {
-                    this.courses = res.data.map(c => c[0]);
-                    this.$refs.courses.setOption({ name: res.data[0][0] });
+                    this.courses = res.data;
+                    this.$refs.courses.setOption({ name: res.data[0] });
+                    this.getCourseList();
                 })
                 .catch((error) => {
                     this.courses = error;
@@ -130,7 +130,7 @@ export default {
             const path = 'http://localhost:5000/courses';
             axios.get(path)
                 .then((res) => {
-                    const newCourses = res.data.map(c => c[0]);
+                    const newCourses = res.data;
                     newCourses.filter((course) => {
                         if (!this.courses.includes(course)) {
                             this.courses.push(course);
@@ -306,6 +306,10 @@ h5 {
     font-size: 22px;
 }
 
+.dropdown {
+    padding-top: 4px;
+    border-bottom: 7px lightgrey solid;
+}
 
 .course-num {
     position: relative;
