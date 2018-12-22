@@ -2,7 +2,7 @@
   <div id="about">
     <h4> About Poly Professors </h4>
     <div class="section">
-        <p>Hello, and welcome to Poly Professors.</p>
+        <h2>Hello, and welcome to Poly Professors.</h2>
         <p>Although at the time of writing this nobody has asked me a single question about this
         website, here's what I anticipate will be some frequently asked questions:</p>
 
@@ -76,6 +76,7 @@ p {
     border-radius: 4px;
     filter: drop-shadow(0 3px 2px #b9b9b9);
     font-size: 22px;
+    border-top: 4px #2c3e50 solid;
 }
 
 </style>

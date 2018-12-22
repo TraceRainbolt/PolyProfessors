@@ -52,7 +52,7 @@ export default {
             this.showMenu = false;
             this.$emit('updateOption', this.selectedOption);
         },
-        setOption(option){
+        setOption(option) {
             this.selectedOption = option;
         },
         toggleMenu() {
@@ -84,7 +84,6 @@ export default {
   font-weight: 300;
   margin-bottom: 7px;
   border: 0;
-  background-image: linear-gradient(#009688, #009688), linear-gradient(#D2D2D2, #D2D2D2);
   background-size: 0 2px, 100% 1px;
   background-repeat: no-repeat;
   background-position: center bottom, center calc(100% - 1px);

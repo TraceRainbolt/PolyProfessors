@@ -7,7 +7,7 @@
         </div>
         <h4>Find a professor</h4>
         <input class="search-text" type="text" v-model="terms"
-        placeholder="Search for a professor..." />
+                placeholder="Search for a professor..." />
         <div class="search">
             <div class="search-btn" v-on:click="goToResults()">
                 <img class="icon" src="@/assets/search-icon.png" />

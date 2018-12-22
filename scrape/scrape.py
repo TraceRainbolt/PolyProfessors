@@ -24,6 +24,7 @@ def main():
     soup = BeautifulSoup(html, 'html.parser')
     prof_links = soup.find_all('a', {'class' : 'no-link-highlight'})
     get_ratings(prof_links)
+    db.update_rating_and_eval()
 
 
 @log.time_scrape

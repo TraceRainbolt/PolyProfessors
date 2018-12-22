@@ -32,6 +32,7 @@ CREATE TABLE reviews (
     dateTaken DATE NOT NULL,
     rating DECIMAL(3, 2),
     review VARCHAR(10000),
+    numEvalutions INT DEFAULT 0,
     PRIMARY KEY (id),
     CONSTRAINT courseId_fk FOREIGN KEY (courseDepartment, courseNumber) REFERENCES courses(courseDepartment, courseNumber),
     CONSTRAINT professorId_fk FOREIGN KEY (professorId) REFERENCES professors(id)

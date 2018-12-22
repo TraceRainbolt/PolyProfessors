@@ -33,7 +33,7 @@ year_to_num = {'Freshman' : 0,
                'Junior' : 2,
                'Senior' : 3,
                '5th Year Senior': 4,
-               'Graduate Student' : 5}
+               'Grad Student' : 5}
 
 req_to_num = {'General Ed' : 0,
               'Major' : 1,
@@ -142,17 +142,49 @@ def add_review():
     conn = mysql.connect()
     cursor = conn.cursor()
 
+    prof_id = data_keys[2]
+
+    # add course if it wasn't already in DB
     cursor.execute("INSERT IGNORE courses (courseDepartment, courseNumber) VALUES (%s, %s)",
         review_data[:2])
 
+    # add review
     cursor.execute("""INSERT INTO reviews (courseDepartment, courseNumber, professorId,
         studentYear, courseRequirement, studentGrade, dateTaken, rating, review)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
         review_data)
 
+    # recalculate professor rating
+    cursor.execute("""UPDATE professors SET professors.rating =
+        (SELECT AVG(reviews.rating) FROM reviews WHERE reviews.professorId = %s)""",
+        prof_id)
+
+    # recalculate number of evaluations for professor
+    cursor.execute("""UPDATE professors SET professors.numEvaluations =
+        (SELECT COUNT(*) FROM reviews WHERE reviews.professorId = %s)""",
+        prof_id)
+
     conn.commit()
     conn.close()
     return jsonify(success=True)
+
+
+# Return all courses
+@app.route('/courses', methods=['GET'])
+def get_courses():
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    prof_id = request.args.get('id')
+
+    if not prof_id:
+        cursor.execute("SELECT DISTINCT courseDepartment FROM courses")
+    else:
+        cursor.execute("SELECT DISTINCT courseDepartment FROM reviews WHERE professorId = %s",
+            prof_id)
+
+    conn.close()
+    return jsonify(cursor.fetchall())
+
 
 # make sure the review doesn't have any funny business going on
 def check_valid(key, data):
@@ -197,23 +229,6 @@ def check_valid(key, data):
             abort(400)
 
     return data
-
-# Return all courses
-@app.route('/courses', methods=['GET'])
-def get_courses():
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    prof_id = request.args.get('id')
-
-    if not prof_id:
-        cursor.execute("SELECT DISTINCT courseDepartment FROM courses")
-    else:
-        cursor.execute("SELECT DISTINCT courseDepartment FROM reviews WHERE professorId = %s",
-            prof_id)
-
-    conn.close()
-    return jsonify(cursor.fetchall())
-
 
 # Try and find mispellings for a professor search
 

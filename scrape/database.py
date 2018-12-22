@@ -1,5 +1,7 @@
-import mysql.connector
+import os
 import datetime
+
+import mysql.connector
 
 year_to_num = {'Freshman' : 0,
                'Sophomore' : 1,
@@ -107,6 +109,19 @@ class Database(object):
 
         self.cursor.execute(add_review_query, (class_dep, class_num, prof_id, *review_data, None, review_text))
         self.connection.commit()
+
+
+    def update_rating_and_eval():
+      # Because we do not know the actual rating value of any polyrating reviews,
+      # we set them all to the overall rating. This makes sure new reviews will
+      # update the average correctly.
+      self.cursor.execute("""UPDATE reviews INNER JOIN professors
+        ON reviews.professorId = professors.id SET reviews.rating = professors.rating;""")
+
+      self.cursor.execute("""UPDATE professors SET professors.numEvaluations =
+        (SELECT COUNT(*) FROM reviews WHERE reviews.professorId = professors.id)""")
+
+      self.connection.commit()
 
 
     def __del__(self):
