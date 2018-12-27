@@ -2,13 +2,13 @@
     <div id="app">
         <div class="nav">
             <span v-on:click="viewProfList()">View professor list</span>
-            <span>Add a professor</span>
+            <span v-on:click="addProfessor">Add a professor</span>
             <span v-on:click="viewAbout">About poly professors</span>
         </div>
         <h4>Find a professor</h4>
-        <input class="search-text" type="text" v-model="terms"
-                placeholder="Search for a professor..." />
         <div class="search">
+            <input class="search-text" type="text" v-model="terms"
+                    placeholder="Search..." />
             <div class="search-btn" v-on:click="goToResults()">
                 <img class="icon" src="@/assets/search-icon.png" />
             </div>
@@ -37,6 +37,9 @@ export default {
         viewAbout() {
             this.$router.push({ name: 'about' });
         },
+        addProfessor() {
+            this.$router.push({ name: 'add' });
+        },
     },
 };
 
@@ -44,12 +47,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
-input[type="text"], input[type="password"], textarea, select {
-    outline: none;
-    border: 0;
-    font-size: 30px;
-}
 
 ::-ms-input-placeholder { /* Microsoft Edge */
     color: darkgrey;
@@ -62,29 +59,31 @@ input[type="text"], input[type="password"], textarea, select {
 h4 {
     position: absolute;
     left: 50%;
-    top: 290px;
+    top: calc(56% - 3em);
     transform: translateX(-50%);
-    font-size: 38px;
+    font-size: 28pt;
+    width: 100%;
 }
 
 h3 {
-    font-size: 25px;
     color: #666666;
+    font-size: 25px;
 }
 
 .nav {
     position: absolute;
     left: 50%;
-    top: 30px;
+    top: 0.5rem;
     transform: translateX(-50%);
     width: 100%;
 }
 
 .nav > span {
-    margin: 0 70px;
-    padding: 10px 15px;
+    display: block;
+    margin: 0 1.0%;
+    padding: 6px;
     border-radius: 4px;
-    font-size: 23px;
+    font-size: 16pt;
 }
 
 .nav > span:hover {
@@ -93,47 +92,53 @@ h3 {
 }
 
 .search {
+    display: grid;
     position: absolute;
+    top: 56%;
     left: 50%;
-    top: 460px;
     transform: translateX(-50%);
-    width: 600px;
-    height: 70px;
+
+    width: 80%;
+    height: 3.6rem;
+    max-width: 38rem;
+
     background: #ffffff;
     filter: drop-shadow(0 3px 2px #b9b9b9);
     border-radius: 4px;
 }
 
 .search-text {
-    margin-top: 6px;
-    position: absolute;
-    top: 460px;
-    width: 490px;
-    height: 60px;
-    transform: translateX(-50%);
+    margin-left: 1rem;
+    margin-top: 0.9rem;
+    height: 2rem;
+    width: calc(100% - 2rem);
 
     background: none;
     color: #111111;
-    left: calc(50% - 33px);
+    left: calc(50% - 2rem);
     z-index: 1;
+
+    outline: none;
+    border: 0;
+    font-size: 18pt;
 }
 
 .icon {
-    top: 18px;
-    right: 24px;
+    top: 1rem;
+    right: .8rem;
     z-index: 3;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 2rem;
+    height: 2rem;
 }
 
 .search-btn {
-    position: relative;
-    left: 100%;
+    position: absolute;
+    left: calc(100% - 1.7rem);
     z-index: 2;
     transform: translateX(-50%);
-    width: 90px;
-    height: 70px;
+    width: 3.6rem;
+    height: 3.6rem;
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
     background: #119235;
@@ -143,4 +148,50 @@ h3 {
 .search-btn:hover {
     background: #128232;
 }
+
+@media (min-width:800px) {
+
+    h4 {
+        width: 100%;
+        top: calc(48% - 4em);
+        font-size: 26pt;
+    }
+
+    .nav {
+        top: 2rem;
+    }
+
+    .nav > span {
+        padding: 0 1em;
+        display: inline;
+        font-size: 18pt;
+    }
+
+    .search {
+        top: 48%;
+        height: 4rem;
+    }
+
+    .search-text {
+        margin-top: 1.2rem;
+        font-size: 20pt;
+    }
+
+    .icon {
+        width: 2.3rem;
+        height: 2.4rem;
+    }
+
+    .search-btn {
+        height: 4rem;
+        width: 4.2rem;
+    }
+}
+
+@media (max-height: 400px) {
+    h4 {
+        display: none;
+    }
+}
+
 </style>

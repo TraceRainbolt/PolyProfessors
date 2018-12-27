@@ -5,15 +5,13 @@
     <div class="results" v-else>
         <div v-if="this.$route.name === 'professors'">
             <h4 class="results-heading"> {{ results.length }} professors </h4>
-            <input class="search-text" type="text" v-model="filter"
-                v-on:input="updateSearch(filter)" placeholder="Filter professors..." />
             <div class="filters">
                 <dropdown class="sort-select filter" :options="sorts" :selected="sort"
                         v-on:updateOption="changeSort"></dropdown>
                 <dropdown class="dep-select filter" :options="courses" :selected="course"
-                        v-on:updateOption="changeCourse"></dropdown>
-                <div class="search">
-                </div>
+                        v-on:updateOption="changeDepartment"></dropdown>
+                <input class="search-text" type="text" v-model="filter"
+                    v-on:input="updateSearch(filter)" placeholder="Filter professors..." />
             </div>
         </div>
         <h4 class="results-heading" v-else> {{ results.length }} results for '{{ terms }}' </h4>
@@ -27,7 +25,7 @@
                     {{ formatRating(result[4]) }}
                 </div>
                 <div class="department">
-                    {{ result[3] }}
+                    {{ formatDepartment(result[3]) }}
                 </div>
                 <div class="eval-num">
                     {{ result[5] }} evaluations
@@ -40,6 +38,7 @@
 <script>
 import axios from 'axios';
 import Dropdown from '@/components/Dropdown';
+import departments from '@/departments';
 
 export default {
     name: 'Results',
@@ -49,14 +48,14 @@ export default {
             loading: true,
             terms: null,
             filter: null,
+            normalSearch: true,
             orderby: 'alphabetical',
             course: { name: 'All' },
             courses: [{ name: 'All' }],
-            sort: { name: 'Alphabetical' },
+            sort: { name: 'Alphabetical', val: 'alphabetical' },
             sorts: [{ name: 'Alphabetical', val: 'alphabetical' },
                 { name: 'Rating', val: 'rating' },
-                { name: 'Department', val: 'department' },
-                { name: 'Last Review', val: 'review' }],
+                { name: 'Department', val: 'department' },],
             isAll: this.$route.name === 'professors',
             filterUpdates: 0,
         };
@@ -69,16 +68,30 @@ export default {
             this.$router.push({ name: 'review', params: { id: result[0] } });
         },
         getResults(terms) {
+            let baseUrl = 'http://localhost:5000/search?';
+
             if (!terms) {
                 this.terms = this.filter;
+            } else {
+                this.terms = terms;
             }
-            this.terms = terms;
-            const path = `http://localhost:5000/search?terms=${this.terms}&sort=${this.orderby}`;
-            axios.get(path)
+
+            if (this.terms) {
+                baseUrl += `terms=${this.terms}&`;
+            }
+            if (this.department && !this.normalSearch) {
+                baseUrl += `department=${this.department}&`;
+            }
+            if (this.sort && !this.normalSearch) {
+                baseUrl += `sort=${this.orderby}`;
+            }
+            axios.get(baseUrl)
                 .then((res) => {
                     this.results = res.data;
                     this.loading = false;
-                    document.title = `${terms} - search`;
+                    if(this.normalSearch){
+                        document.title = `${this.terms} - search`;
+                    }
                     if (this.results.length === 1 && !this.isAll) {
                         this.$router.replace({ name: 'review',
                             params: { id: this.results[0][0] } });
@@ -130,6 +143,9 @@ export default {
             }
             return '';
         },
+        formatDepartment(department) {
+            return departments[department];
+        },
         filterResults() {
             if (this.filter) {
                 this.getResults(this.filter);
@@ -139,10 +155,17 @@ export default {
         },
         changeSort(sort) {
             this.orderby = sort.val;
+            this.sort = sort;
             this.getResults(this.filter);
         },
-        changeCourse(course) {
-            // do somtin
+        changeDepartment(department) {
+            this.course = department;
+            this.department = department.name;
+            this.getResults(this.filter);
+        },
+        resetData() {
+            this.terms = null;
+            this.loading = true;
         },
         render() {
             const terms = this.$route.params.terms;
@@ -154,9 +177,14 @@ export default {
         },
     },
     activated() {
-        this.loading = true;
-        this.terms = null;
-        this.render();
+        if (this.$router.previous.name === 'search'
+            && this.$router.history.current.name === 'results') {
+            this.normalSearch = true;
+            this.resetData();
+            this.render();
+        } else {
+            this.normalSearch = false;
+        }
     },
     created() {
         this.render();
@@ -202,11 +230,15 @@ li:hover {
 
 
 .results {
+    margin-top: 2rem;
     position: absolute;
     left: 50%;
     transform: translate(-50%, 0);
-    text-align: left;
+
+    width: 100%;
+    max-width: 800px;
     padding-left: calc(100vw - 100%); /* Trick to keep centered even with scrollbar */
+    text-align: left;
 }
 
 .loading {
@@ -251,13 +283,17 @@ li:hover {
 }
 
 .filters {
-    z-index: 999;
+    margin-top: 10px;
+    margin-left: 16px;
+    width: 750px;
     display: grid;
+    grid-column-gap: 16px;
     grid-template-areas:
-    'sort dep-filter search';
+    'sort dep-filter search-text';
 }
 
 .filter {
+    margin: 0;
     padding: 4px 8px 14px 8px;
     background: white;
     font-size: 26px;
@@ -269,36 +305,24 @@ li:hover {
 
 .sort-select {
     width: 180px;
-    margin-left: 16px;
 }
 
 .dep-select {
     width: 110px;
-    margin-left: -9px;
-}
-
-.search {
-    width: 432px;
-    margin: 10px 0 0 -8px;
-    height: 58px;
-    background: #ffffff;
-    filter: drop-shadow(0 3px 2px #b9b9b9);
-    border-radius: 4px;
 }
 
 .search-text {
-    margin-top: 6px;
-    margin-left: 260px;
-    position: absolute;
-    top: 39px;
-    width: 500px;
-    height: 60px;
-    transform: translateX(-50%);
+    margin: 0;
+    width: 400px;
+    height: 56px;
 
-    background: none;
+    padding-left: 15px;
+
+    background: #ffffff;
+    filter: drop-shadow(0 3px 2px #b9b9b9);
+    border-radius: 4px;
+
     color: #111111;
-    left: calc(50% - 33px);
-    z-index: 1;
 }
 
 .icon {
@@ -326,4 +350,5 @@ li:hover {
 .search-btn:hover {
     background: #128232;
 }
+
 </style>

@@ -8,6 +8,7 @@ Vue.config.productionTip = false;
 
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title;
+    router.previous = from;
     next();
 });
 

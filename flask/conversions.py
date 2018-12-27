@@ -111,91 +111,6 @@ departments = {
 }
 
 
-departments = {
-    'Crop Science': 'AEPS',
-    'Environmental Horticulture Science': 'AEPS',
-    'Aerospace Engineering': 'AERO'
-    'Agribusiness': 'AGB',
-    'Agriculture': 'AG',
-    'Agricultural Education and Communication': 'AGED',
-    'Architectural Engineering': 'ARCE',
-    'Architecture': 'ARCH',
-    'Art and Design': 'ART',
-    'Animal Science': 'ASCI',
-    'Biological Sciences': 'BIO',
-    'Biomedical Engineering': 'BMED',
-    'Bioresource and Agricultural Engineering': 'BRAE',
-    'Business': 'BUS',
-    'Civil and Environmental Engineering': 'CE',
-    'Chemistry and Biochemistry': 'CHEM',
-    'Construction Management': 'CM',
-    'Communication Studies': 'COMS',
-    'Computer Engineering': 'CPE',
-    'City and Regional Planning': 'CRP',
-    'Computer Science': 'CSC',
-    'DANC'
-    'DATA'
-    'Dairy Science': 'DSCI',
-    'Economics': 'ECON',
-    'Environmental Design': 'EDES',
-    'Education': 'EDUC',
-    'Electrical Engineering': 'EE',
-    'English': 'ENGL',
-    'Engineering': 'ENGR',
-    'ENVE'
-    'ERSC'
-    'Ethnic Studies': 'ES',
-    'FR'
-    'ESE'
-    'ESM'
-    'Food Science and Nutrition': 'FSN',
-    'GEOG'
-    'GEOL'
-    'GER'
-    'GRC'
-    'Graduate Programs': 'GSB',
-    'HIST'
-    'HNRC'
-    'HNRS'
-    'IME'
-    'ISLA'
-    'ITAL'
-    'ITP'
-    'JOUR'
-    'JPNS'
-    'KINE'
-    'LA'
-    'LAES'
-    'LS'
-    'MATE'
-    'MATH'
-    'MCRO'
-    'ME'
-    'MSCI
-    'MSL'
-    'MU'
-    'NR'
-    'PEM'
-    'PEW'
-    'PHIL'
-    'PHYS'
-    'POLS'
-    'PSC'
-    'PSY'
-    'RELS
-    'RPTA
-    'SCM'
-    'SOC'
-    'SOCS'
-    'SPAN'
-    'SS'
-    'STAT
-    'TH'
-    'UNIV'
-    'WGS'
-    'WL'
-    'WVIT'
-}
 
 
 
@@ -206,35 +121,7 @@ departments = {
 
 
 
-Graduate Programs
 
 
-Graphic Communication
-History
-Humanities
-Industrial and Manufacturing Engineering
-Industrial Technology
-Journalism
-Landscape Architecture
-Liberal Studies
-Materials Engineering
-Mathematics
-Mechanical Engineering
-Military Science
-Modern Languages and Literatures
-Music
-Natural Resources Management
-Philosophy
-Physical Education and Kinesiology
-Physics
-Political Science
-Psychology and Human Development
-Science and Mathematics
-Social Sciences
-Soil Science
-Statistics
-Theater and Dance
-University Honors
-University Library
-Women's and Gender Studies
-Womens Studies
+
+

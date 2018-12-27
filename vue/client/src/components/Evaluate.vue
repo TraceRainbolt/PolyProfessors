@@ -1,12 +1,25 @@
 <template>
     <div class="evaluate">
-        <h4> Evaluate {{ `${professor[1]} ${professor[2]}` }}</h4>
+        <div  v-if="this.$route.name === 'add'">
+            <h4>Add a Professor</h4>
+            <div class="add-professor" >
+                <input class="first name" type="text" v-model="terms"
+                    placeholder="First Name" />
+                <input class="last name" type="text" v-model="terms"
+                    placeholder="Last Name" />
+                <dropdown class="dropdown prof-dep" ref="courses" :options="courses" :selected="course"
+                    v-on:updateOption="updateCourse"></dropdown>
+            </div>
+        </div>
+        <div v-else>
+            <h4> Evaluate {{ `${professor[1]} ${professor[2]}` }}</h4>
+        </div>
         <div class="form">
             <div class="info">
                 <div class="prof-grade-select">
                     <h5>How would you rate this professor?</h5>
                     <dropdown :options="ratings" :selected="rating"
-                    v-on:updateOption="updateRating"></dropdown>
+                        v-on:updateOption="updateRating"></dropdown>
                 </div>
                 <div class="course-select">
                     <h5>Select the course:</h5>
@@ -119,7 +132,7 @@ export default {
             axios.get(path)
                 .then((res) => {
                     this.courses = res.data;
-                    this.$refs.courses.setOption({ name: res.data[0] });
+                    this.$refs.courses.setOption({ name: res.data[0] || 'AERO' });
                     this.getCourseList();
                 })
                 .catch((error) => {
@@ -185,7 +198,7 @@ export default {
         this.render();
     },
     created() {
-        this.render();
+        // this.render();
     },
 };
 </script>
@@ -196,11 +209,41 @@ input:focus{
     outline: none;
 }
 
+.add-professor {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.name {
+    width: calc(100% - 50px);
+    font-family: 'Helvetica';
+    font-size: 22px;
+    margin: 0.8rem;
+    padding: 0 10px;
+    height: 2.35em;
+    border: none;
+    background: #ffffff;
+    filter: drop-shadow(0 3px 2px #b9b9b9);
+    border-radius: 4px;
+}
+
+.prof-dep {
+    width: calc(100% - 30px);
+    z-index: 10;
+    margin-left: 0.6em;
+    margin-bottom: 1rem;
+    background: white;
+    font-size: 22px;
+    border-radius: 4px;
+    filter: drop-shadow(0 3px 2px #b9b9b9);
+    border: none;
+    background-image: none;
+}
+
 textarea {
-    width: 765px;
-    height: 500px;
+    width: calc(100% - 0.4rem);
+    height: 20rem;
     margin-top: 14px;
-    padding: 15px;
     font-family: 'Helvetica';
     font-size: 26px;
     border: 1px #AAAAAA solid;
@@ -208,18 +251,10 @@ textarea {
     resize: none;
 }
 
-.help {
-    position: absolute;
-    bottom: 48px;
-    font-size: 14px;
-    text-align: left;
-    width: 520px;
-}
-
 button {
-    position: absolute;
-    bottom: 20px;
-    right: 30px;
+    margin-top: 1rem;
+    text-align: left;
+    display: inline;
     padding: 20px 10px;
     font-family: Montserrat ExtraBold;
     font-size: 22px;
@@ -244,38 +279,41 @@ textarea:focus {
 }
 
 h4 {
+    max-width: 100vw;
+    margin: 0.3rem;
+    margin-top: 0.5rem;
     text-align: left;
-    font-size: 32px;
-    margin: 10px 0;
+    font-size: 1.9rem;
 }
 
 h5 {
     margin: 0;
     padding: 0;
-    font-size: 22px;
+    font-size: 18pt;
     text-align: left;
 }
 
 .info > div {
     height: 100px;
+    margin-bottom: 1.2rem
 }
 
 .evaluate {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, 0);
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .form {
+    margin-bottom: 80px;
     display: grid;
-    height: 700px;
-    margin-bottom: 120px;
     grid-template-areas:
-    'info review';
+    'info'
+    'review';
 }
 
 .info {
     display: grid;
+    margin: 0.3rem;
 
     grid-template-areas:
     'course-select'
@@ -283,8 +321,7 @@ h5 {
     'year-select'
     'req-select';
 
-    width: 300px;
-    padding: 20px 20px;
+    padding: 10px 10px;
     border-top: 4px #2c3e50 solid;
 
     text-align: left;
@@ -295,11 +332,10 @@ h5 {
 }
 
 .review {
+    margin: 0.3rem;
     border-top: 4px #2c3e50 solid;
-
-    padding: 20px 20px;
-    margin-left: 20px;
-    width: 800px;
+    text-align: left;
+    padding: 10px 10px;
     background: white;
     border-radius: 2px;
     filter: drop-shadow(0 3px 2px #b9b9b9);
@@ -307,13 +343,14 @@ h5 {
 }
 
 .dropdown {
-    padding-top: 4px;
-    border-bottom: 7px lightgrey solid;
+    padding-top: 5px;
+    padding-bottom: 6px;
+    border-bottom: 1px lightgrey solid;
 }
 
 .course-num {
     position: relative;
-    width: 100px;
+    width: 80px;
     color: #2c3e50;
     font-family: Montserrat;
     padding-bottom: 9px;
@@ -324,10 +361,54 @@ h5 {
     border-bottom: 1px lightgrey solid;
 }
 
+.help {
+    font-size: 14px;
+    text-align: left;
+}
+
 .grade-select {
     position: relative;
     margin-left: 0;
     padding-left: 0;
+}
+
+@media (min-width:800px) {
+
+    h4 {
+        margin-top: 2rem;
+    }
+
+    textarea {
+        height: 28rem;
+    }
+
+    .add-professor {
+        max-width: 1200px;
+    }
+
+    .name {
+        width: 30%;
+    }
+
+    .prof-dep {
+        width: 20%;
+    }
+
+    .evaluate {
+        max-width: 1200px;
+    }
+
+    .form {
+        margin-top: 1rem;
+        grid-template-areas:
+        'info review';
+    }
+
+    .info {
+    }
+
+    .review {
+    }
 }
 
 </style>

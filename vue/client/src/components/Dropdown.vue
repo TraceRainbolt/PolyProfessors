@@ -85,14 +85,15 @@ export default {
   margin-bottom: 7px;
   border: 0;
 
-  background-color: white;
+  background: transparent;
   transition: background 0s ease-out;
   float: none;
   box-shadow: none;
   border-radius: 0;
 }
 .dropdown-toggle:hover {
-  background: #e1e1e1;
+  border-radius: 4px;
+  background: #F0F0F0;
   cursor: pointer;
 }
 

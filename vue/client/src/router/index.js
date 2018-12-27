@@ -45,6 +45,12 @@ export default new Router({
             component: Evaluate,
         },
         {
+            meta: { title: 'Add Professor' },
+            path: '/add',
+            name: 'add',
+            component: Evaluate,
+        },
+        {
             meta: { title: 'About' },
             path: '/about',
             name: 'about',

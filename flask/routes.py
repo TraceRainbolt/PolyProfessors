@@ -34,39 +34,47 @@ def search_results():
     search = request.args.get('terms')
     sort = request.args.get('sort')
     department = request.args.get('department')
+    search_by_dep = False
 
-    sort_mode = ''
+    search_mode = ''
 
     conn = mysql.connect()
     cursor = conn.cursor()
 
+    if department is not None and department in conversions.departments.keys():
+            search_mode = f" department='{department}'"
+            search_by_dep = True
 
     if sort == 'rating':
-        sort_mode = " ORDER BY rating DESC, numEvaluations DESC"
+        search_mode += " ORDER BY rating DESC, numEvaluations DESC"
     elif sort == 'department':
-        sort_mode = " ORDER BY department ASC"
+        search_mode += " ORDER BY department ASC"
     elif sort == 'review':
-        sort_mode = " ORDER BY department ASC"
+        search_mode += " ORDER BY department ASC"
 
+    if search is None:
+        if search_by_dep:
+            search_mode = " WHERE" + search_mode
 
-
-    if not search:
-        cursor.execute("SELECT * FROM professors" + sort_mode)
+        cursor.execute("SELECT * FROM professors" + search_mode)
         data = cursor.fetchall()
 
         conn.close()
         return jsonify(data)
 
+    if search_by_dep:
+        search_mode = " AND" + search_mode
+
     search_str = f'%{search.lower()}%'
     cursor.execute("""SELECT * FROM professors
-                      WHERE CONCAT(firstName, ' ', lastName) LIKE %s
-                      OR CONCAT(lastName, ' ', firstName) LIKE %s""" + sort_mode,
+                      WHERE (CONCAT(firstName, ' ', lastName) LIKE %s
+                      OR CONCAT(lastName, ' ', firstName) LIKE %s)""" + search_mode,
         (search_str, search_str))
     data = cursor.fetchall()
 
     # we found nothing, lets keep trying
     if len(data) == 0:
-        data = smart_search(search, cursor, sort_mode)
+        data = smart_search(search, cursor, search_mode)
 
     conn.close()
     return jsonify(data)
@@ -227,15 +235,15 @@ def check_valid(key, data):
 # NOTE: the LEVENSHTEIN function does not come with mysql,
 # the implementation was found at:
 # https://gist.github.com/Kovah/df90d336478a47d869b9683766cff718
-def smart_search(search, cursor, sort_mode):
+def smart_search(search, cursor, search_mode):
     search = search.split(' ')
     l_threshold = 1
 
     # Search had 1 name
     if len(search) == 1:
         cursor.execute(f"""SELECT * FROM professors
-                            WHERE LEVENSHTEIN(lastName, %s) <= {l_threshold}
-                            OR LEVENSHTEIN(firstName, %s) <= {l_threshold}""" + sort_mode,
+                            WHERE (LEVENSHTEIN(lastName, %s) <= {l_threshold}
+                            OR LEVENSHTEIN(firstName, %s) <= {l_threshold})""" + search_mode,
                 (search, search))
 
         return cursor.fetchall()
@@ -246,8 +254,8 @@ def smart_search(search, cursor, sort_mode):
 
         # first assume that the first word is the first name
         cursor.execute(f"""SELECT * FROM professors
-                    WHERE LEVENSHTEIN(lastName, %s) <= {l_threshold}
-                    AND LEVENSHTEIN(firstName, %s) <= {l_threshold}""" + sort_mode,
+                    WHERE (LEVENSHTEIN(lastName, %s) <= {l_threshold}
+                    AND LEVENSHTEIN(firstName, %s) <= {l_threshold})""" + search_mode,
         (search[0], search[1]))
 
         # if that yields nothing, then assume first word is the last name
@@ -256,8 +264,8 @@ def smart_search(search, cursor, sort_mode):
             return data
 
         cursor.execute(f"""SELECT * FROM professors
-                    WHERE LEVENSHTEIN(lastName, %s) <= {l_threshold}
-                    AND LEVENSHTEIN(firstName, %s) <= {l_threshold}""" + sort_mode,
+                    WHERE (LEVENSHTEIN(lastName, %s) <= {l_threshold}
+                    AND LEVENSHTEIN(firstName, %s) <= {l_threshold})""" + search_mode,
         (search[1], search[0]))
 
         return cursor.fetchall()

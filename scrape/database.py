@@ -32,6 +32,7 @@ class Database(object):
         self.cursor.execute("TRUNCATE reviews")
         self.cursor.execute("SET FOREIGN_KEY_CHECKS=1")
 
+
     # Add a professor to the database. Returns the professors internal ID
     def add_professor(self, name, department, rating):
         add_professor_query = """INSERT INTO professors
@@ -58,6 +59,8 @@ class Database(object):
         update_professor_query = """UPDATE professors SET
                 lastName = %s, firstName = %s, department = %s, rating = %s
                 WHERE lastName = %s AND firstName = %s"""
+
+        department = conversions.departments[department]
 
         get_id_query = ("SELECT id FROM professors WHERE lastName = %s AND firstName = %s")
 
